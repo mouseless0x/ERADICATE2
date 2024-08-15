@@ -35,7 +35,7 @@ void Speed::update(const unsigned int numPoints, const unsigned int indexDevice)
 	const auto ns = std::chrono::steady_clock::now().time_since_epoch().count();
 	const bool bPrint = ((ns - m_lastPrint) / 1000000) > m_intervalPrintMs;
 
-	updateList(numPoints, ns, m_lSamples);
+	//updateList(numPoints, ns, m_lSamples);
 	updateList(numPoints, ns, m_mDeviceSamples[indexDevice]);
 
 	if (bPrint) {
@@ -44,9 +44,9 @@ void Speed::update(const unsigned int numPoints, const unsigned int indexDevice)
 	}
 }
 
-double Speed::getSpeed() const {
-	return this->getSpeed(m_lSamples);
-}
+//double Speed::getSpeed() const {
+//	return this->getSpeed(m_lSamples);
+//}
 
 double Speed::getSpeed(const unsigned int indexDevice) const {
 	return m_mDeviceSamples.count(indexDevice) == 0 ? 0 : this->getSpeed(m_mDeviceSamples.at(indexDevice));
@@ -77,13 +77,20 @@ void Speed::updateList(const unsigned int & numPoints, const long long & ns, sam
 }
 
 void Speed::print() const {
-	const std::string strVT100ClearLine = "\33[2K\r";
-	std::cout << strVT100ClearLine << "Speed: " << formatSpeed(this->getSpeed());
-	
+    double totalSpeed = 0.0;
+	std::ostringstream oss;
+	//const std::string strVT100ClearLine = "\33[2K\r";
+	//std::cout << strVT100ClearLine << "Speed: " << formatSpeed(this->getSpeed());
+    //
 	// std::map is sorted by key so we'll always have the devices in numerical order
 	for (auto it = m_mDeviceSamples.begin(); it != m_mDeviceSamples.end(); ++it) {
-		std::cout << " GPU" << it->first << ": " << formatSpeed(this->getSpeed(it->second));
+		//std::cout << " GPU" << it->first << ": " << formatSpeed(this->getSpeed(it->second));
+        const double speed = this->getSpeed(it->second);
+		totalSpeed += speed;
+		oss << " GPU" << it->first << ": " << formatSpeed(speed);
 	}
 
-	std::cout << "\r" << std::flush;
+	//std::cout << "\r" << std::flush;
+    const std::string strVT100ClearLine = "\33[2K\r";
+	std::cout << strVT100ClearLine << "Speed: " << formatSpeed(totalSpeed) << oss.str() << "\r" << std::flush;
 }

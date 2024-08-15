@@ -18,7 +18,7 @@ public:
 	void update(const unsigned int numPoints, const unsigned int indexDevice);
 	void print() const;
 
-	double getSpeed() const;
+	//double getSpeed() const;
 	double getSpeed(const unsigned int indexDevice) const;
 
 private:
@@ -31,7 +31,7 @@ private:
 
 	long long m_lastPrint;
 	mutable std::recursive_mutex m_mutex;
-	sampleList m_lSamples;
+	//sampleList m_lSamples;
 	std::map<unsigned int, sampleList> m_mDeviceSamples;
 };
 
