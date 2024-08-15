@@ -91,6 +91,6 @@ void Speed::print() const {
 	}
 
 	//std::cout << "\r" << std::flush;
-    const std::string strVT100ClearLine = "\33[2K\r";
-	std::cout << strVT100ClearLine << "Speed: " << formatSpeed(totalSpeed) << oss.str() << "\r" << std::flush;
+    //const std::string strVT100ClearLine = "\33[2K\r";
+	//std::cout << strVT100ClearLine << "Speed: " << formatSpeed(totalSpeed) << oss.str() << "\r" << std::flush;
 }
