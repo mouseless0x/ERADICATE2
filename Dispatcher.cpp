@@ -111,16 +111,16 @@ void Dispatcher::run(const mode & mode) {
 		// Kernel arguments - eradicate2_iterate
 		d.m_memResult.setKernelArg(d.m_kernelIterate, 0);
 		d.m_memMode.setKernelArg(d.m_kernelIterate, 1);
-		CLMemory<cl_uchar>::setKernelArg(d.m_kernelIterate, 2, d.m_clScoreMax); // Updated in handleResult()		
+		CLMemory<cl_uchar>::setKernelArg(d.m_kernelIterate, 2, d.m_clScoreMax); // Updated in handleResult()
 		CLMemory<cl_uint>::setKernelArg(d.m_kernelIterate, 3, d.m_index);
 		// Round information updated in deviceDispatch()
 	}
-	
+
 	m_quit = false;
 	m_countRunning = m_vDevices.size();
 
 	std::cout << "Running..." << std::endl;
-	std::cout << std::endl;
+	//std::cout << std::endl;
 
 	// Start asynchronous dispatch loop on all devices
 	for (auto it = m_vDevices.begin(); it != m_vDevices.end(); ++it) {
@@ -195,7 +195,7 @@ void Dispatcher::deviceDispatch(Device & d) {
 	} else {
 		cl_event event;
 		d.m_memResult.read(false, &event);
-		
+
 		CLMemory<cl_uint>::setKernelArg(d.m_kernelIterate, 4, ++d.m_round); // Round information updated in deviceDispatch()
 		enqueueKernelDevice(d, d.m_kernelIterate, m_size);
 		clFlush(d.m_clQueue);

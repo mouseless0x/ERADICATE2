@@ -113,12 +113,12 @@ std::vector<std::string> getBinaries(cl_program & clProgram) {
 }
 
 template <typename T> bool printResult(const T & t, const cl_int & err) {
-	std::cout << ((t == NULL) ? lexical_cast::write(err) : "OK") << std::endl;
+	std::cout << ((t == NULL) ? lexical_cast::write(err) : "") << std::endl;
 	return t == NULL;
 }
 
 bool printResult(const cl_int err) {
-	std::cout << ((err != CL_SUCCESS) ? lexical_cast::write(err) : "OK") << std::endl;
+	std::cout << ((err != CL_SUCCESS) ? lexical_cast::write(err) : "") << std::endl;
 	return err != CL_SUCCESS;
 }
 
@@ -283,7 +283,7 @@ int main(int argc, char * * argv) {
 		std::vector<size_t> vDeviceBinarySize;
 		cl_int errorCode;
 
-		std::cout << "Devices:" << std::endl;
+		//std::cout << "Devices:" << std::endl;
 		for (size_t i = 0; i < vFoundDevices.size(); ++i) {
 			// Ignore devices in skip index
 			if (std::find(vDeviceSkipIndex.begin(), vDeviceSkipIndex.end(), i) != vDeviceSkipIndex.end()) {
@@ -296,7 +296,7 @@ int main(int argc, char * * argv) {
 			const auto computeUnits = clGetWrapper<cl_uint>(clGetDeviceInfo, deviceId, CL_DEVICE_MAX_COMPUTE_UNITS);
 			const auto globalMemSize = clGetWrapper<cl_ulong>(clGetDeviceInfo, deviceId, CL_DEVICE_GLOBAL_MEM_SIZE);
 
-			std::cout << "  GPU" << i << ": " << strName << ", " << globalMemSize << " bytes available, " << computeUnits << " compute units" << std::endl;
+			//std::cout << "  GPU" << i << ": " << strName << ", " << globalMemSize << " bytes available, " << computeUnits << " compute units" << std::endl;
 			vDevices.push_back(vFoundDevices[i]);
 			mDeviceIndex[vFoundDevices[i]] = i;
 		}
@@ -306,8 +306,8 @@ int main(int argc, char * * argv) {
 		}
 
 		std::cout << std::endl;
-		std::cout << "Initializing OpenCL..." << std::endl;
-		std::cout << "  Creating context..." << std::flush;
+		//std::cout << "Initializing OpenCL..." << std::endl;
+		//std::cout << "  Creating context..." << std::flush;
 		auto clContext = clCreateContext( NULL, vDevices.size(), vDevices.data(), NULL, NULL, &errorCode);
 		if (printResult(clContext, errorCode)) {
 			return 1;
@@ -316,7 +316,7 @@ int main(int argc, char * * argv) {
 		cl_program clProgram;
 		if (vDeviceBinary.size() == vDevices.size()) {
 			// Create program from binaries
-			std::cout << "  Loading kernel from binary..." << std::flush;
+			//std::cout << "  Loading kernel from binary..." << std::flush;
 			const unsigned char * * pKernels = new const unsigned char *[vDevices.size()];
 			for (size_t i = 0; i < vDeviceBinary.size(); ++i) {
 				pKernels[i] = reinterpret_cast<const unsigned char *>(vDeviceBinary[i].data());
@@ -330,7 +330,7 @@ int main(int argc, char * * argv) {
 			}
 		} else {
 			// Create a program from the kernel source
-			std::cout << "  Compiling kernel..." << std::flush;
+			//std::cout << "  Compiling kernel..." << std::flush;
 			const std::string strKeccak = readFile("keccak.cl");
 			const std::string strVanity = readFile("eradicate2.cl");
 			const char * szKernels[] = { strKeccak.c_str(), strVanity.c_str() };
@@ -342,26 +342,26 @@ int main(int argc, char * * argv) {
 		}
 
 		// Build the program
-		std::cout << "  Building program..." << std::flush;
+		//std::cout << "  Building program..." << std::flush;
 
 		const std::string strBuildOptions = "-D ERADICATE2_MAX_SCORE=" + lexical_cast::write(ERADICATE2_MAX_SCORE) + " -D ERADICATE2_INITHASH=" + strPreprocessorInitStructure;
 		if (printResult(clBuildProgram(clProgram, vDevices.size(), vDevices.data(), strBuildOptions.c_str(), NULL, NULL))) {
 #ifdef ERADICATE2_DEBUG
-			std::cout << std::endl;
-			std::cout << "build log:" << std::endl;
+			//std::cout << std::endl;
+			//std::cout << "build log:" << std::endl;
 
 			size_t sizeLog;
 			clGetProgramBuildInfo(clProgram, vDevices[0], CL_PROGRAM_BUILD_LOG, 0, NULL, &sizeLog);
 			char * const szLog = new char[sizeLog];
 			clGetProgramBuildInfo(clProgram, vDevices[0], CL_PROGRAM_BUILD_LOG, sizeLog, szLog, NULL);
 
-			std::cout << szLog << std::endl;
+			//std::cout << szLog << std::endl;
 			delete[] szLog;
 #endif
 			return 1;
 		}
 
-		std::cout << std::endl;
+		//std::cout << std::endl;
 
 		Dispatcher d(clContext, clProgram, worksizeMax == 0 ? size : worksizeMax, size);
 		for (auto & i : vDevices) {
