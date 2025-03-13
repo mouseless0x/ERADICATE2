@@ -11,7 +11,10 @@
 #include <algorithm>
 #include "hexadecimal.hpp"
 
-static void printResult(const result r, const cl_uchar score, const std::chrono::time_point<std::chrono::steady_clock> & timeStart) {
+#include <curl/curl.h>
+#include <string>
+
+static void printResult(const result r, const cl_uchar score, const std::chrono::time_point<std::chrono::steady_clock> & timeStart, const std::string & endpoint = "") {
 	// Time delta
 	const auto seconds = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - timeStart).count();
 
@@ -22,6 +25,40 @@ static void printResult(const result r, const cl_uchar score, const std::chrono:
 	// Print
 	const std::string strVT100ClearLine = "\33[2K\r";
 	std::cout << strVT100ClearLine << "  Time: " << std::setw(5) << seconds << "s Score: " << std::setw(2) << (int) score << " Salt: 0x" << strSalt << " Address: 0x" << strPublic << std::endl;
+	
+	// Send to endpoint if provided
+	if (!endpoint.empty()) {
+		try {
+			CURL *curl = curl_easy_init();
+			if (curl) {
+				// Format the JSON payload
+				std::string payload = "{\"salt\": \"0x" + strSalt + "\", \"address\": \"0x" + strPublic + "\", \"score\": " + std::to_string(score) + "}";
+				
+				// Setup curl request
+				curl_easy_setopt(curl, CURLOPT_URL, endpoint.c_str());
+				curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload.c_str());
+				
+				// Headers
+				struct curl_slist *headers = NULL;
+				headers = curl_slist_append(headers, "Content-Type: application/json");
+				curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+				
+				// Perform the request
+				CURLcode res = curl_easy_perform(curl);
+				if (res != CURLE_OK) {
+					std::cerr << "Failed to send result to endpoint: " << curl_easy_strerror(res) << std::endl;
+				} else {
+					std::cout << "Result sent to endpoint: " << endpoint << std::endl;
+				}
+				
+				// Cleanup
+				curl_slist_free_all(headers);
+				curl_easy_cleanup(curl);
+			}
+		} catch (const std::exception& e) {
+			std::cerr << "Exception when sending result to endpoint: " << e.what() << std::endl;
+		}
+	}
 }
 
 Dispatcher::OpenCLException::OpenCLException(const std::string s, const cl_int res) :
@@ -77,8 +114,8 @@ Dispatcher::Device::~Device() {
 
 }
 
-Dispatcher::Dispatcher(cl_context & clContext, cl_program & clProgram, const size_t worksizeMax, const size_t size)
-	: m_clContext(clContext), m_clProgram(clProgram), m_worksizeMax(worksizeMax), m_size(size), m_clScoreMax(0), m_eventFinished(NULL), m_countPrint(0) {
+Dispatcher::Dispatcher(cl_context & clContext, cl_program & clProgram, const size_t worksizeMax, const size_t size, const std::string & endpoint)
+	: m_clContext(clContext), m_clProgram(clProgram), m_worksizeMax(worksizeMax), m_size(size), m_clScoreMax(0), m_vDevices(), m_endpoint(endpoint), m_eventFinished(NULL), m_countPrint(0) {
 
 }
 
@@ -178,7 +215,7 @@ void Dispatcher::deviceDispatch(Device & d) {
 
 				// TODO: Add quit condition
 
-				printResult(r, i, timeStart);
+				printResult(r, i, timeStart, m_endpoint);
 			}
 
 			break;

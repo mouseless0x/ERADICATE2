@@ -198,6 +198,7 @@ int main(int argc, char * * argv) {
 		std::string strAddress;
 		std::string strInitCode;
 		std::string strInitCodeFile;
+		std::string strEndpoint;
 
 		argp.addSwitch('h', "help", bHelp);
 		argp.addSwitch('0', "benchmark", bModeBenchmark);
@@ -220,6 +221,7 @@ int main(int argc, char * * argv) {
 		argp.addSwitch('A', "address", strAddress);
 		argp.addSwitch('I', "init-code", strInitCode);
 		argp.addSwitch('i', "init-code-file", strInitCodeFile);
+		argp.addSwitch('e', "endpoint", strEndpoint);
 
 		if (!argp.parse()) {
 			std::cout << "error: bad arguments, try again :<" << std::endl;
@@ -363,7 +365,7 @@ int main(int argc, char * * argv) {
 
 		//std::cout << std::endl;
 
-		Dispatcher d(clContext, clProgram, worksizeMax == 0 ? size : worksizeMax, size);
+		Dispatcher d(clContext, clProgram, worksizeMax == 0 ? size : worksizeMax, size, strEndpoint);
 		for (auto & i : vDevices) {
 			d.addDevice(i, worksizeLocal, mDeviceIndex[i]);
 		}

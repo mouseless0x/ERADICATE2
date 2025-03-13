@@ -1,0 +1,7 @@
+.git
+.gitignore
+*.o
+ERADICATE2.x64
+Dockerfile
+.dockerignore
+README.md

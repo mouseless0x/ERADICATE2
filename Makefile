@@ -5,12 +5,19 @@ OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=ERADICATE2.x64
 
 UNAME_S := $(shell uname -s)
+UNAME_M := $(shell uname -m)
+
 ifeq ($(UNAME_S),Darwin)
-	LDFLAGS=-framework OpenCL
-	CFLAGS=-c -std=c++11 -Wall -mmmx -O2
+	LDFLAGS=-framework OpenCL -lcurl
+	CFLAGS=-c -std=c++11 -Wall -O2
 else
-	LDFLAGS=-s -lOpenCL -mcmodel=large
-	CFLAGS=-c -std=c++11 -Wall -mmmx -O2 -mcmodel=large 
+	ifeq ($(findstring x86,$(UNAME_M)),x86)
+		LDFLAGS=-s -lOpenCL -lcurl -mcmodel=large
+		CFLAGS=-c -std=c++11 -Wall -mmmx -O2 -mcmodel=large
+	else
+		LDFLAGS=-s -lOpenCL -lcurl
+		CFLAGS=-c -std=c++11 -Wall -O2
+	endif
 endif
 
 all: $(SOURCES) $(EXECUTABLE)

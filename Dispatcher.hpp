@@ -56,7 +56,7 @@ class Dispatcher {
 		};
 
 	public:
-		Dispatcher(cl_context & clContext, cl_program & clProgram, const size_t worksizeMax, const size_t size);
+		Dispatcher(cl_context & clContext, cl_program & clProgram, const size_t worksizeMax, const size_t size, const std::string & endpoint = "");
 		~Dispatcher();
 
 		void addDevice(cl_device_id clDeviceId, const size_t worksizeLocal, const size_t index);
@@ -82,6 +82,7 @@ class Dispatcher {
 		const size_t m_size;
 		cl_uchar m_clScoreMax;
 		std::vector<Device *> m_vDevices;
+		std::string m_endpoint;
 
 		cl_event m_eventFinished;
 

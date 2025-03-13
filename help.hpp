@@ -10,6 +10,7 @@ usage: ./ERADICATE2 [OPTIONS]
     -A, --address           Target address
     -I, --init-code         Init code
     -i, --init-code-file    Read init code from this file
+    -e, --endpoint          URL endpoint to post results to
 
     The init code should be expressed as a hexadecimal string having the
     prefix 0x both when expressed on the command line with -I and in the
