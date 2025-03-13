@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM --platform=linux/amd64 ubuntu:20.04
 
 # Set non-interactive mode for apt
 ENV DEBIAN_FRONTEND=noninteractive
@@ -17,6 +17,9 @@ WORKDIR /app
 
 # Copy source files
 COPY . .
+
+# Copy init code files
+COPY v6.txt v7.txt /app/
 
 # Build the application
 RUN make
