@@ -1,12 +1,15 @@
-FROM --platform=linux/amd64 ubuntu:20.04
+FROM --platform=linux/amd64 nvidia/opencl:devel-ubuntu18.04
 
 # Set non-interactive mode for apt
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
-    g++ \
-    make \
+    curl \
+    build-essential \
+    git \
+    pkg-config \
+    libssl-dev \
     ocl-icd-opencl-dev \
     opencl-headers \
     libcurl4-openssl-dev \
@@ -24,6 +27,3 @@ COPY v6.txt v7.txt /app/
 # Build the application
 RUN make
 
-# Set the entrypoint
-ENTRYPOINT ["./ERADICATE2.x64"]
-CMD ["--help"]
